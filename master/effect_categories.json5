@@ -1,0 +1,144 @@
+[
+  // 通常遺物
+  {
+    "id": 1,
+    "name": "能力値",
+    "type": "normal",
+  },
+  {
+    "id": 2,
+    "name": "攻撃力",
+    "type": "normal",
+  },
+  {
+    "id": 3,
+    "name": "スキル／アーツ",
+    "type": "normal",
+  },
+  {
+    "id": 4,
+    "name": "魔術／祈祷",
+    "type": "normal",
+  },
+  {
+    "id": 5,
+    "name": "カット率",
+    "type": "normal",
+  },
+  {
+    "id": 6,
+    "name": "状態異常耐性",
+    "type": "normal",
+  },
+  {
+    "id": 7,
+    "name": "回復",
+    "type": "normal",
+  },
+  {
+    "id": 8,
+    "name": "アクション",
+    "type": "normal",
+  },
+  {
+    "id": 9,
+    "name": "戦技",
+    "type": "normal",
+  },
+  {
+    "id": 10,
+    "name": "付加",
+    "type": "normal",
+  },
+  {
+    "id": 11,
+    "name": "アイテム",
+    "type": "normal",
+  },
+  {
+    "id": 12,
+    "name": "マップ環境",
+    "type": "normal",
+  },
+  {
+    "id": 13,
+    "name": "チームメンバー",
+    "type": "normal",
+  },
+  {
+    "id": 14,
+    "name": "キャラクター固有",
+    "type": "normal",
+  },
+  {
+    "id": 15,
+    "name": "特定武器",
+    "type": "normal",
+  },
+  // 深層遺物
+  {
+    "id": 101,
+    "name": "能力値",
+    "type": "depth",
+  },
+  {
+    "id": 102,
+    "name": "攻撃力",
+    "type": "depth",
+  },
+  {
+    "id": 103,
+    "name": "スキル／アーツ",
+    "type": "depth",
+  },
+  {
+    "id": 104,
+    "name": "魔術／祈祷",
+    "type": "depth",
+  },
+  {
+    "id": 105,
+    "name": "カット率",
+    "type": "depth",
+  },
+  {
+    "id": 106,
+    "name": "状態異常耐性",
+    "type": "depth",
+  },
+  {
+    "id": 107,
+    "name": "回復",
+    "type": "depth",
+  },
+  {
+    "id": 108,
+    "name": "アクション",
+    "type": "depth",
+  },
+  {
+    "id": 109,
+    "name": "アイテム",
+    "type": "depth",
+  },
+  {
+    "id": 110,
+    "name": "マップ環境",
+    "type": "depth",
+  },
+  {
+    "id": 111,
+    "name": "チームメンバー",
+    "type": "depth",
+  },
+  {
+    "id": 112,
+    "name": "キャラクター固有",
+    "type": "depth",
+  },
+  {
+    "id": 113,
+    "name": "特定武器",
+    "type": "depth",
+  },
+]
