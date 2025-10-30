@@ -1486,7 +1486,7 @@ function isOptOutGA(){
   const url = new URL(location.href);
   const isNotProduction = (
     url.hostname !== "17number.github.io" ||
-    !url.pathname.startsWith("/enr-relics-merger")
+    !url.pathname.startsWith("/enr-relics-simulator")
   );
   return isNotProduction;
 }
