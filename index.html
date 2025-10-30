@@ -211,6 +211,73 @@
   .tab-content.active {
     display: block;
   }
+  /* デモモード ON/OFF */
+  .demo-toggle{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom: 8px;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans JP",sans-serif;
+  }
+  .switch-input{
+    position:absolute;
+    opacity:0;
+    width:1px;height:1px;
+    margin:-1px;padding:0;border:0;clip:rect(0 0 0 0);overflow:hidden;white-space:nowrap;
+  }
+  .switch{
+    --w:48px;
+    --h:28px;
+    --knob:22px;
+    --on-bg:#2b6cb0;
+    --off-bg:#e6eef8;
+    --border:#d0d7df;
+    display:inline-block;
+    width:var(--w);
+    height:var(--h);
+    background:var(--off-bg);
+    border:1px solid var(--border);
+    border-radius:999px;
+    margin: 0;
+    padding: (var(--h) - var(--knob)) / 2;
+    box-sizing:border-box;
+    position:relative;
+    transition: background .18s ease, border-color .18s ease, transform .12s ease;
+    cursor:pointer;
+    vertical-align:middle;
+  }
+  .switch-knob{
+    position:absolute;
+    top:50%;
+    left:4px;
+    width:var(--knob);
+    height:var(--knob);
+    transform:translateY(-50%);
+    background:#fff;
+    border-radius:50%;
+    box-shadow:0 2px 6px rgba(0,0,0,0.12);
+    transition: left .18s ease, transform .12s ease;
+    will-change: left;
+  }
+  .switch-input:checked + .switch{
+    background: linear-gradient(90deg, rgba(43,108,176,0.98), rgba(57,119,184,0.98));
+    border-color: rgba(43,108,176,0.9);
+  }
+  .switch-input:checked + .switch .switch-knob{
+    left: calc(100% - var(--knob) - 4px);
+  }
+  .switch-input:focus + .switch{
+    box-shadow: 0 0 0 4px rgba(43,108,176,0.12);
+    outline: none;
+  }
+  .switch-input:disabled + .switch{
+    opacity: .5;
+    cursor: not-allowed;
+  }
+  .switch-label{font-size:14px;color:#333}
+  .switch-label strong{margin-left:6px;color:#2b6cb0}
+  .switch, .switch-label { user-select: none; }
+
 </style>
 <!-- JSON5 for browser -->
 <script src="https://cdn.jsdelivr.net/npm/json5@2.2.3/dist/index.min.js"></script>
@@ -241,6 +308,13 @@
 <div class="tab-content" id="searchTab">
   <div class="row">
     <div class="panel" style="flex:1 1 360px">
+      <div class="demo-toggle">
+        <input id="demoSwitch1" class="switch-input" type="checkbox" />
+        <label for="demoSwitch1" class="switch" aria-hidden="true">
+          <span class="switch-knob"></span>
+        </label>
+        <span id="demoSwitchLabel" class="switch-label">デモモード: <strong id="demoSwitchStatus">OFF</strong></span>
+      </div>
       <label class="heading">1: キャラクターを選択</label>
       <div id="characterList" class="character-grid"></div>
       <hr />
@@ -289,6 +363,13 @@
 <div class="tab-content" id="inventoryTab">
   <div class="row">
     <div class="panel" style="flex:1 1 360px">
+      <div class="demo-toggle">
+        <input id="demoSwitch2" class="switch-input" type="checkbox" />
+        <label for="demoSwitch2" class="switch" aria-hidden="true">
+          <span class="switch-knob"></span>
+        </label>
+        <span id="demoSwitchLabel" class="switch-label">デモモード: <strong id="demoSwitchStatus">OFF</strong></span>
+      </div>
       <label>所持遺物（ユーザー登録・検索）</label>
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
         <input id="inventorySearch" placeholder="ID/効果名/かな/色(r/g/b/y)/大きさ(s/m/l)/遺物種類(n/d)を検索" style="flex:1" />
@@ -397,6 +478,7 @@ const FILES = [
   "master/characters.json5",
   "master/effect_categories.json5",
   "master/effect_groups.json5",
+  "master/demo_relics.json5",
 ];
 
 let DATA = {};
@@ -406,8 +488,10 @@ let normalEffects= [], depthEffects = [], allEffects = [];
 let allRelics = [];
 let disadvantages = [], characters = [], chalices = [], relicNames = [], uniqueRelics = [];
 let userRelics = [];
+let demoRelics = [];
 let searchCondition = {};
 let isSearching = false;
+let isDemoMode = false;
 const expandCache = new Map();
 const USER_RELICS_KEY = "my_relics";
 const SEARCH_CONDITION = "search_cond";
@@ -473,17 +557,19 @@ async function loadAll(){
   uniqueRelics = DATA[FILES.at(5)] || [];
   allRelics = [...uniqueRelics, ...relicNames];
   characters = DATA[FILES.at(6)] || [];
+  demoRelics = DATA[FILES.at(9)] || [];
 
   // load user relics from localStorage
   userRelics = loadUserRelics();
-  buildUserRelicsForRender();
+  userRelics = buildUserRelicsForRender(userRelics);
+  demoRelics = buildUserRelicsForRender(demoRelics);
 
   // load user search condition
   loadSearchCondition();
 }
 
-function buildUserRelicsForRender() {
-  userRelics = userRelics.map(r => {
+function buildUserRelicsForRender(relics) {
+  return relics.map(r => {
     const relicObj = allRelics.find(_r => _r.id === r.relic_id);
     const _effects = r.effects.map(eid => {
       const effectObj = allEffects.find(_e => _e.id === eid);
@@ -645,7 +731,7 @@ function saveSearchCondition(){
 function loadUserRelics(){
   const raw = localStorage.getItem(USER_RELICS_KEY);
   userRelics = raw ? JSON.parse(raw) : [];
-  return userRelics
+  return userRelics;
 }
 
 /**
@@ -662,6 +748,22 @@ function saveUserRelics(){
           relic_id: r.relic_id,
           effects: r.effects,
           disadvantages: r.disadvantages,
+        }))
+    ),
+  );
+}
+
+function saveUserRelicsWithExtended(){
+  localStorage.setItem(
+    USER_RELICS_KEY,
+    JSON.stringify(
+      (userRelics||[])
+        .map(r => ({
+          id: r.id,
+          color: r.color,
+          relic_id: r.relic_id,
+          effects: r.effects.map(e => e?.id ?? 0),
+          disadvantages: r.disadvantages.map(d => d?.id ?? 0),
         }))
     ),
   );
@@ -765,7 +867,7 @@ async function importCSV(file, mode) {
   }
 
   saveUserRelics();
-  buildUserRelicsForRender();
+  userRelics = buildUserRelicsForRender(userRelics);
   renderRelics();
 
   console.table(imported);
@@ -773,6 +875,10 @@ async function importCSV(file, mode) {
 
   clearImportCsvFile();
   closeRelicModal();
+
+  if (isDemoMode) {
+    toggleDemoMode(false);
+  }
 }
 
 document.querySelectorAll(`[id*="importCsv"]`)
@@ -1027,9 +1133,9 @@ function normalizeFullwidth(str) {
   );
 }
 
-function filterRelics() {
+function filterRelics(relics) {
   const q = (document.getElementById("inventorySearch").value || "").toLowerCase().trim();
-  let filtered = userRelics;
+  let filtered = relics;
   q.split(/\s/).forEach(_q => {
     filtered = filtered.filter(r=>{
       if(!r) return false;
@@ -1069,7 +1175,7 @@ function filterRelics() {
   return filtered;
 }
 
-function createRelicDiv(relic) {
+function createRelicDiv(relic, relics) {
   const div = document.createElement("div");
   const colorFirstLetter = relic.color ? relic.color[0] : "grey";
   div.classList.add("relic-item", `bg-${colorFirstLetter}`);
@@ -1099,9 +1205,8 @@ function createRelicDiv(relic) {
     <div style="flex:1">
       <div>
         <span class="color-chip ${colorClass}"></span>
-        <strong>${relic.name}</strong>
-        ${relic.unique?'<span class="muted small">（ユニーク）</span>':''}
-        <span class="tiny">(${userRelics.indexOf(relic) + 1}: ${relic.id})</span>
+        <strong>${isDemoMode ? "[デモ] " : ""}${relic.name}</strong>
+        <span class="tiny">(${relics.indexOf(relic) + 1}: ${relic.id})</span>
       </div>
       <div class="small muted">
         <ul class="effect-list">
@@ -1115,33 +1220,39 @@ function createRelicDiv(relic) {
   `;
   return div;
 }
-function onClickRelicDelete() {
-  const id = Number(b.dataset.id);
+function onClickRelicDelete(b) {
+  const id = b.dataset.id;
+  const relics = isDemoMode ? demoRelics : userRelics;
   if(confirm("本当にこの所持遺物を削除しますか？")){
-    userRelics = userRelics.filter(x=>x.id!==id);
-    saveUserRelics();
+    if (isDemoMode) {
+      demoRelics = demoRelics.filter(x=>x.id!==id);
+    } else {
+      userRelics = userRelics.filter(x=>x.id!==id);
+      saveUserRelicsWithExtended();
+    }
     renderRelics();
   }
 }
 function renderRelics(){
   const list = document.getElementById("inventoryList");
   list.innerHTML = "";
-  if (userRelics.length === 0) {
+  const relics = isDemoMode ? demoRelics : userRelics;
+  if (relics.length === 0) {
     list.textContent = "(登録遺物0件)";
     return;
   }
   // allow search
-  const filtered = filterRelics();
+  const filtered = filterRelics(relics);
   if (filtered.length===0){
     list.textContent = "(該当なし)";
     return;
   }
-  for(const r of filtered){
-    list.appendChild(createRelicDiv(r));
+  for (const r of filtered){
+    list.appendChild(createRelicDiv(r, relics));
   }
   // handlers
   list.querySelectorAll(".btn-del").forEach(b=>{
-    b.addEventListener("click", onClickRelicDelete);
+    b.addEventListener("click", () => onClickRelicDelete(b));
   });
 }
 document.getElementById("inventorySearch").addEventListener("input", renderRelics);
@@ -1272,7 +1383,8 @@ document.getElementById("searchBtn").addEventListener("click", async ()=>{
 
     // also we might want to include all unique relics as available even if user hasn't acquired them? the UI checkbox 'includeUnique' controls whether unique relics are used as pool.
     // prepare effectMap param for search
-    let relicPool = userRelics.filter(r =>
+    const relics = isDemoMode ? demoRelics : userRelics;
+    let relicPool = relics.filter(r =>
       r.effects.some(e => desired.includes(e?.id))
     );
     if (excluded.length) {
@@ -1397,7 +1509,7 @@ function renderResults(results, desired) {
           <div class="muted small">スロット ${i+1}</div>
           <div style="display:flex;align-items:center;gap:8px">
             <span class="color-chip ${colorClass}"></span>
-            <strong data-relic-id="${slot.id}">${slot.name ?? ""}</strong>
+            <strong data-relic-id="${slot.id}">${isDemoMode ? "[デモ] " : ""}${slot.name ?? ""}</strong>
             <span class="tiny">(${slot.id})</span>
           </div>
           <div class="small muted" style="margin-top:6px">
@@ -1419,16 +1531,6 @@ document.getElementById("clearResultsBtn").addEventListener("click", ()=> {
   if (isSearching) return;
   document.getElementById("resultsArea").textContent = "結果をクリアしました";
 });
-
-/* initialize */
-loadAll()
-  .then(() => {
-    renderWithData();
-    document.getElementById("resultsArea").textContent = "準備完了。キャラ/効果/デメリット を設定し、探索開始ボタンを押してください。";
-  }).catch(e => {
-    console.error(e);
-    document.getElementById("resultsArea").textContent = "読み込み失敗。コンソールを確認してください。";
-  })
 
 /* --- タブ切り替え処理 --- */
 /**
@@ -1494,6 +1596,28 @@ function isOptOutGA(){
   );
   return isNotProduction;
 }
+
+// Demo mode
+function toggleDemoMode(_isDemoMode) {
+  isDemoMode = _isDemoMode;
+  document.querySelectorAll("#demoSwitchStatus").forEach(e => e.textContent = isDemoMode ? "ON" : "OFF");
+  document.querySelectorAll("input.switch-input").forEach(e => {
+    if (e.checked === _isDemoMode) return;
+    e.checked = _isDemoMode;
+  });
+  renderRelics();
+}
+document.querySelectorAll("input.switch-input").forEach(e => e.addEventListener("change", (event) => toggleDemoMode(event.target.checked)));
+
+/* initialize */
+loadAll()
+  .then(() => {
+    renderWithData();
+    document.getElementById("resultsArea").textContent = "準備完了。キャラ/効果/デメリット を設定し、探索開始ボタンを押してください。";
+  }).catch(e => {
+    console.error(e);
+    document.getElementById("resultsArea").textContent = "読み込み失敗。コンソールを確認してください。";
+  })
 </script>
 </body>
 </html>
