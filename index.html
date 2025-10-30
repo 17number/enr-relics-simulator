@@ -254,12 +254,16 @@
       </div>
       <hr />
 
-      <label class="heading">3: 除外したいデメリット効果（最大9件）</label>
+      <label class="heading">3: 除外したいデメリット効果</label>
       <div style="margin-bottom:8px">
         <button id="addExcludedBtn" class="btn-secondary">＋ 除外デメリットを追加</button>
         <button id="resetExcludedBtn" class="btn-secondary">リセット</button>
       </div>
       <div id="excludedList"></div>
+      <div style="margin-bottom:8px">
+        <button id="addExcludedBtn" class="btn-secondary">＋ 除外デメリットを追加</button>
+        <button id="resetExcludedBtn" class="btn-secondary">リセット</button>
+      </div>
       <hr />
 
       <label class="heading">4: 実行</label>
@@ -365,7 +369,7 @@
 
 <script>
 MAX_EFFECT_NUM = 18;
-MAX_DISADVANTAGE_NUM = 9;
+MAX_DISADVANTAGE_NUM = 24;
 
 /* -----------------------
   App code: UI + data loading
@@ -917,16 +921,16 @@ function renderDesiredRows(clear = false) {
 function initExcludedArea(){
   const container = document.getElementById("excludedList");
   container.innerHTML = "";
-  document.getElementById("addExcludedBtn").addEventListener("click", () => {
+  document.querySelectorAll("#addExcludedBtn").forEach(e => e.addEventListener("click", () => {
     addExcludedRow();
     updateSearchCondition();
     saveSearchCondition();
-  });
-  document.getElementById("resetExcludedBtn").addEventListener("click", () => {
+  }));
+  document.querySelectorAll("#resetExcludedBtn").forEach(e => e.addEventListener("click", () => {
     container.innerHTML = "";
     updateSearchCondition();
     saveSearchCondition();
-  });
+  }));
 
   // 前回の設定を復元
   renderExcludedRows();
