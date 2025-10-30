@@ -176,6 +176,12 @@
   .muted{color:#666;font-size:13px}
   .btn-secondary{background:#fff;border:1px solid #ddd}
   .btn-primary{background:#2b6cb0;color:#fff;border:none}
+  .btn-secondary:disabled,
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
   .footer{margin-top:12px;color:#666;font-size:13px}
   label{display:block;font-size:13px;margin-bottom:6px}
   #importRelicsModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:80;align-items:center;justify-content:center}
@@ -385,6 +391,7 @@ let allRelics = [];
 let disadvantages = [], characters = [], chalices = [], relicNames = [], uniqueRelics = [];
 let userRelics = [];
 let searchCondition = {};
+let isSearching = false;
 const expandCache = new Map();
 const USER_RELICS_KEY = "my_relics";
 const SEARCH_CONDITION = "search_cond";
@@ -1162,12 +1169,25 @@ searchWorker.onmessage = function(e) {
     statusArea.textContent = `探索完了: 所要時間 ${t}。結果はあくまで目安です。ビルド構築の参考にしてみてください。`;
     renderResults(data.results, data.desired);
     playCompletionSound();
+
+    toggleSearching();
   } else {
     console.error(data.error);
     playErrorBeep();
     alert("探索中にエラーが発生しました: " + data.error);
+
+    toggleSearching();
   }
 };
+
+function toggleSearching() {
+  isSearching = !isSearching;
+  document.querySelectorAll("#searchBtn, #clearResultsBtn")
+    .forEach(btn => {
+      if (isSearching) btn.setAttribute("disabled", "disabled");
+      else btn.removeAttribute("disabled");
+    })
+}
 
 function playCompletionSound() {
   const synth = new Tone.Synth().toDestination();
@@ -1193,6 +1213,8 @@ function playErrorBeep() {
 }
 
 document.getElementById("searchBtn").addEventListener("click", async ()=>{
+  if (isSearching) return;
+
   try{
     const selected = document.querySelector('input[name="character"]:checked');
     if (!selected) return;
@@ -1273,6 +1295,8 @@ document.getElementById("searchBtn").addEventListener("click", async ()=>{
       desired,
       maxResults: 10,
     });
+
+    toggleSearching();
   }catch(e){
     console.error(e);
     alert("探索中にエラーが発生しました: " + e.message);
@@ -1376,6 +1400,7 @@ function renderResults(results, desired) {
 }
 
 document.getElementById("clearResultsBtn").addEventListener("click", ()=> {
+  if (isSearching) return;
   document.getElementById("resultsArea").textContent = "結果をクリアしました";
 });
 
