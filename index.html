@@ -370,6 +370,11 @@
   </div>
 </div>
 
+<footer style="font-size: 0.9em; margin-top: 1rem; text-align: center;">
+  <a href="privacy.html" style="padding: 0; margin: 0;">プライバシーポリシー</a>
+  <div id="version" style="color: #666;"></div>
+</footer>
+
 <script>
 MAX_EFFECT_NUM = 18;
 MAX_DISADVANTAGE_NUM = 24;
@@ -1456,6 +1461,35 @@ document.addEventListener("DOMContentLoaded", () => {
   const initialTab = loadActiveTab();
   document.querySelector(`.tab-header .tab-btn[data-tab="${initialTab}"]`).click();
 });
+
+// Google Analytics
+let gtag = () => {};
+function insertScriptForGA() {
+  if (isOptOutGA()) return;
+
+  window.dataLayer = window.dataLayer || [];
+  gtag = function(){dataLayer.push(arguments);};
+
+  // スクリプト読み込み完了後に初期化
+  const script = document.createElement("script");
+  script.src = "https://www.googletagmanager.com/gtag/js?id=G-EKKVGVS0YV";
+  script.async = true;
+  script.onload = () => {
+    gtag('js', new Date());
+    gtag('config', 'G-EKKVGVS0YV', { anonymize_ip: true });
+  };
+  document.head.appendChild(script);
+}
+insertScriptForGA();
+
+function isOptOutGA(){
+  const url = new URL(location.href);
+  const isNotProduction = (
+    url.hostname !== "17number.github.io" ||
+    !url.pathname.startsWith("/enr-relics-merger")
+  );
+  return isNotProduction;
+}
 </script>
 </body>
 </html>
