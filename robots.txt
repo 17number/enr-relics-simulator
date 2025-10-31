@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://17number.github.io/enr-relics-simulator/sitemap.xml
