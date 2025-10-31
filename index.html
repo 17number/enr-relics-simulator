@@ -37,6 +37,26 @@
 
 <!-- goat counter -->
 <script data-goatcounter="https://enr-relics-simulator.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<!-- JSON5 for browser -->
+<script src="https://cdn.jsdelivr.net/npm/json5@2.2.3/dist/index.min.js"></script>
+<!-- Tom Select -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<!-- Paraparse -->
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
+<!-- fuse.js -->
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.1.0/dist/fuse.min.js"></script>
+<!-- ULID -->
+<script src="https://cdn.jsdelivr.net/npm/ulid@2.4.0/dist/index.umd.min.js"></script>
+<!-- dayjs -->
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+<!-- Tonejs -->
+<script src="https://cdn.jsdelivr.net/npm/tone@15.1.22/build/Tone.min.js"></script>
+<!-- d3-array -->
+<script src="https://cdn.jsdelivr.net/npm/d3-array@3.2.4/dist/d3-array.min.js"></script>
+<!-- tingle -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tingle.js@0.15.3/dist/tingle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/tingle.js@0.15.3/dist/tingle.min.js"></script>
 
 <style>
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;margin:16px;background:#f6f7fb;color:#111}
@@ -136,6 +156,7 @@
   .effect-row .btn-secondary[id*="remove"],
   .disadvantage-row .btn-secondary[id*="remove"],
   #resetDesiredBtn, #resetExcludedBtn, #clearResultsBtn,
+  #inventoryHeader #deleteRelics,
   #inventoryList .relic-item .btn-secondary[data-id] {
     color: #c33;
     border-color: #c33;
@@ -143,6 +164,7 @@
   .effect-row .btn-secondary[id*="remove"]:hover,
   .disadvantage-row .btn-secondary[id*="remove"]:hover,
   #resetDesiredBtn:hover, #resetExcludedBtn:hover, #clearResultsBtn:hover,
+  #inventoryHeader #deleteRelics:hover,
   #inventoryList .relic-item .btn-secondary[data-id] {
     background: #fdd;
   }
@@ -287,25 +309,19 @@
   .switch-label{font-size:14px;color:#333}
   .switch-label strong{margin-left:6px;color:#2b6cb0}
   .switch, .switch-label { user-select: none; }
-
+  .tingle-modal-box__content {
+    padding: 1.5rem;
+    p {
+      margin: 0.5rem 0;
+    }
+  }
+  .tingle-modal-box__footer {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    button {
+      margin: 0 0.5rem 0 0;
+    }
+  }
 </style>
-<!-- JSON5 for browser -->
-<script src="https://cdn.jsdelivr.net/npm/json5@2.2.3/dist/index.min.js"></script>
-<!-- Tom Select -->
-<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-<!-- Paraparse -->
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
-<!-- fuse.js -->
-<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.1.0/dist/fuse.min.js"></script>
-<!-- ULID -->
-<script src="https://cdn.jsdelivr.net/npm/ulid@2.4.0/dist/index.umd.min.js"></script>
-<!-- dayjs -->
-<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
-<!-- Tonejs -->
-<script src="https://cdn.jsdelivr.net/npm/tone@15.1.22/build/Tone.min.js"></script>
-<!-- d3-array -->
-<script src="https://cdn.jsdelivr.net/npm/d3-array@3.2.4/dist/d3-array.min.js"></script>
 </head>
 <body>
 <h1>ELDEN RING NIGNTREIGN 遺物組み合わせ(ビルド)探索ツール</h1>
@@ -386,6 +402,7 @@
       <div id="inventoryHeader">
         <input id="inventorySearch" placeholder="ID/効果名/かな/色(r/g/b/y)/大きさ(s/m/l)/遺物種類(n/d)を検索" style="flex:1" />
         <button id="openAddRelic" class="btn-secondary">＋ 所持遺物を登録</button>
+        <button id="deleteRelics" class="btn-secondary" disabled>チェック済を削除</button>
       </div>
       <div id="inventoryList" class="muted">所持遺物読み込み中...</div>
     </div>
@@ -505,6 +522,7 @@ let disadvantages = [], characters = [], chalices = [], relicNames = [], uniqueR
 let userRelics = [];
 let demoRelics = [], demoActiveRelics = [];
 let searchCondition = {};
+let deleteRelicIds = [];
 let isSearching = false;
 let isDemoMode = false;
 const expandCache = new Map();
@@ -1195,7 +1213,8 @@ function createRelicDiv(relic, relics) {
   const colorFirstLetter = relic.color ? relic.color[0] : "grey";
   div.classList.add("relic-item", `bg-${colorFirstLetter}`);
   const colorClass = `color-${colorFirstLetter}`;
-  const deleteButton = relic.unique ? "" : `<button class="btn-secondary btn-del" data-id="${relic.id}">削除</button>`;
+  const checked = deleteRelicIds.includes(relic.id) ? "checked" : "";
+  const deleteCheckbox = relic.unique ? "" : `<label><input type="checkbox" id="delete-${relic.id}" data-id="${relic.id}" ${checked}>削除</label>`;
   const effectsAndDisadvantages = [];
   for (let i = 0; i < 3; i++) {
     const effect = relic.effects[i];
@@ -1230,24 +1249,44 @@ function createRelicDiv(relic, relics) {
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:6px">
-      ${deleteButton}
+      ${deleteCheckbox}
     </div>
   `;
   return div;
 }
-function onClickRelicDelete(b) {
-  const id = b.dataset.id;
-  const relics = isDemoMode ? demoActiveRelics : userRelics;
-  if(confirm("本当にこの所持遺物を削除しますか？")){
-    if (isDemoMode) {
-      demoActiveRelics = demoActiveRelics.filter(x=>x.id!==id);
-    } else {
-      userRelics = userRelics.filter(x=>x.id!==id);
-      saveUserRelicsWithExtended();
-    }
-    renderRelics();
+async function onChangeRelicDeleteCheckbox(event) {
+  const id = event.target.dataset.id;
+  const checked = event.target.checked;
+  if (checked) {
+    deleteRelicIds = Array.from(new Set([...deleteRelicIds, id]));
+  } else {
+    deleteRelicIds = deleteRelicIds.filter(v => v !== id);
+  }
+
+  const deleteButtton = document.getElementById("deleteRelics");
+  if (deleteRelicIds.length) {
+    deleteButtton.removeAttribute("disabled");
+  } else {
+    deleteButtton.setAttribute("disabled", "disabled");
   }
 }
+async function onClickRelicsDeleteButton() {
+  if (deleteRelicIds.length === 0) return;
+
+  const isConfirmed = await showConfirmDialog("確認", "チェックした遺物を削除しますか？");
+  if (!isConfirmed) {
+    return;
+  }
+
+  if (isDemoMode) {
+    demoActiveRelics = demoActiveRelics.filter(x=> !deleteRelicIds.includes(x.id));
+  } else {
+    userRelics = userRelics.filter(x=> !deleteRelicIds.includes(x.id));
+    saveUserRelicsWithExtended();
+  }
+  renderRelics();
+}
+document.getElementById("deleteRelics").addEventListener("click", onClickRelicsDeleteButton);
 function renderRelics(){
   const list = document.getElementById("inventoryList");
   list.innerHTML = "";
@@ -1266,8 +1305,8 @@ function renderRelics(){
     list.appendChild(createRelicDiv(r, relics));
   }
   // handlers
-  list.querySelectorAll(".btn-del").forEach(b=>{
-    b.addEventListener("click", () => onClickRelicDelete(b));
+  list.querySelectorAll("input[id^='delete-']").forEach(i => {
+    i.addEventListener("change", onChangeRelicDeleteCheckbox);
   });
 }
 document.getElementById("inventorySearch").addEventListener("input", renderRelics);
@@ -1614,10 +1653,13 @@ function isOptOutGA(){
 
 // Demo mode
 function toggleDemoMode(_isDemoMode) {
-  if (_isDemoMode && _isDemoMode !== isDemoMode) {
-    demoActiveRelics = JSON.parse(JSON.stringify(demoRelics));
-    d3.shuffle(demoActiveRelics);
-    demoActiveRelics = demoActiveRelics.slice(0, 300);
+  if (_isDemoMode !== isDemoMode) {
+    if (_isDemoMode) {
+      demoActiveRelics = JSON.parse(JSON.stringify(demoRelics));
+      d3.shuffle(demoActiveRelics);
+      demoActiveRelics = demoActiveRelics.slice(0, 300);
+    }
+    deleteRelicIds = [];
   }
 
   isDemoMode = _isDemoMode;
@@ -1629,6 +1671,31 @@ function toggleDemoMode(_isDemoMode) {
   renderRelics();
 }
 document.querySelectorAll("input.switch-input").forEach(e => e.addEventListener("change", (event) => toggleDemoMode(event.target.checked)));
+
+function showConfirmDialog(title, message) {
+  return new Promise(resolve => {
+    const modal = new tingle.modal({
+      footer: true,
+      closeMethods: ['overlay', 'button', 'escape'],
+      closeLabel: "閉じる",
+    });
+
+    modal.setContent(`
+      <h3 style="margin:0">${title ?? ""}</h3>
+      <p>${message ?? ""}</p>
+    `);
+    modal.addFooterBtn('削除', 'tingle-btn tingle-btn--danger', function() {
+      modal.close();
+      resolve(true);
+    });
+    modal.addFooterBtn('キャンセル', 'tingle-btn tingle-btn--default', function() {
+      modal.close();
+      resolve(false);
+    });
+
+    modal.open();
+  });
+}
 
 /* initialize */
 loadAll()
