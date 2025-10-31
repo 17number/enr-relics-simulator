@@ -1159,7 +1159,10 @@ function isOptOutGA(){
 // Demo mode
 function toggleDemoMode(_isDemoMode) {
   if (_isDemoMode !== isDemoMode) {
-    if (_isDemoMode) {
+    if (!_isDemoMode) {
+      document.body.style.backgroundColor = "";
+    } else {
+      document.body.style.backgroundColor = "#f3ecff";
       demoActiveRelics = JSON.parse(JSON.stringify(demoRelics));
       d3.shuffle(demoActiveRelics);
       demoActiveRelics = demoActiveRelics.slice(0, 300);
