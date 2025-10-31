@@ -1,0 +1,64 @@
+name: Update version.json and sitemap.xml
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "version.json"
+      - "sitemap.xml"
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
+
+      - name: Get commit info
+        id: commit
+        run: |
+          echo "date=$(git log -1 --format=%cd --date=iso-strict)" >> $GITHUB_OUTPUT
+          echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Update version.json
+        run: |
+          echo "{\"date\": \"${{ steps.commit.outputs.date }}\", \"hash\": \"${{ steps.commit.outputs.hash }}\"}" > version.json
+
+      - name: Update sitemap.xml
+        run: |
+          DATE="${{ steps.commit.outputs.date }}"
+          SITEMAP="sitemap.xml"
+
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > "$SITEMAP"
+          echo '<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="https://www.w3.org/1999/xhtml">' >> "$SITEMAP"
+
+          echo '  <url>' >> "$SITEMAP"
+          echo '    <loc>https://17number.github.io/enr-relics-simulator/</loc>' >> "$SITEMAP"
+          echo "    <lastmod>$DATE</lastmod>" >> "$SITEMAP"
+          echo '    <changefreq>weekly</changefreq>' >> "$SITEMAP"
+          echo '    <priority>1.0</priority>' >> "$SITEMAP"
+          echo '  </url>' >> "$SITEMAP"
+
+          echo '  <url>' >> "$SITEMAP"
+          echo '    <loc>https://17number.github.io/enr-relics-simulator/privacy.html</loc>' >> "$SITEMAP"
+          echo "    <lastmod>$DATE</lastmod>" >> "$SITEMAP"
+          echo '    <changefreq>monthly</changefreq>' >> "$SITEMAP"
+          echo '    <priority>0.8</priority>' >> "$SITEMAP"
+          echo '  </url>' >> "$SITEMAP"
+
+          echo '</urlset>' >> "$SITEMAP"
+
+      - name: Commit and push updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add version.json sitemap.xml
+          git commit -m "Update version.json and sitemap.xml [skip ci]" || echo "No changes to commit"
+          git push
