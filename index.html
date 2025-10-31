@@ -294,6 +294,8 @@
 <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
 <!-- Tonejs -->
 <script src="https://cdn.jsdelivr.net/npm/tone@15.1.22/build/Tone.min.js"></script>
+<!-- d3-array -->
+<script src="https://cdn.jsdelivr.net/npm/d3-array@3.2.4/dist/d3-array.min.js"></script>
 </head>
 <body>
 <h1>ELDEN RING NIGNTREIGN 遺物組み合わせ(ビルド)探索ツール</h1>
@@ -385,7 +387,9 @@
     <h3>ツール概要</h3>
     <p>
       本ツールは <strong>ELDEN RING NIGHTREIGN</strong> に登場する「遺物」を登録し、<br>
-      <strong>欲しい効果をできる限り実現できる組み合わせ</strong> を探索するための支援ツールです。
+      <strong>欲しい効果をできる限り実現できる組み合わせ</strong> を探索するための支援ツールです。<br>
+      まずは「<strong>デモモード</strong>」でお気軽にお試しください。「ビルド探索」タブ、「所持遺物」タブのすぐ下にあるスイッチで ON/OFF を切り替えられます。<br>
+      デモモードでは、ツール制作者の所持遺物からランダムに選ばれた300件を使用して探索を体験できます。
     </p>
 
     <h4>使い方</h4>
@@ -418,7 +422,7 @@
       <li>欲しい効果を増やすほど探索時間が長くなります。最初は少数の効果で試すのをおすすめします。</li>
       <li>
         上位互換効果の採用や、通常遺物の代わりに深層遺物側で代用には<strong>非対応</strong>です。<br>
-        (例: 「物理攻撃力上昇＋２」指定で「物理攻撃力上昇＋４」を採用、通常側で「短剣の攻撃力上昇」を指定して深層側で採用)
+        (例: 「物理攻撃力上昇＋２」を指定しても「＋４」を採用したり、通常側で指定した「短剣の攻撃力上昇」を深層側で採用したりはしません)
       </li>
       <li>探索にかかる時間・速度はご利用のPCスペックに依存します。</li>
     </ul>
@@ -427,6 +431,7 @@
     <ul>
       <li>「所持遺物」タブでは、登録済みの遺物一覧を検索・管理できます。</li>
       <li>登録データはブラウザ内に保存されます（リロードや再訪問時にも復元されます）。</li>
+      <li>デモモードの遺物は、ON/OFF を切り替えるたびにランダムに選出されます。</li>
       <li>ツールは個人制作の非公式ファンツールです。ゲーム公式・運営元とは一切関係ありません。</li>
       <li>ビルド画像を生成するための別ツール(<a href="https://17number.github.io/enr-relics-merger/" target="_blank" rel="noopener">ELDEN RING NIGHTREIGN 遺物画像結合ツール</a>)もぜひご利用ください。</li>
     </ul>
@@ -488,7 +493,7 @@ let normalEffects= [], depthEffects = [], allEffects = [];
 let allRelics = [];
 let disadvantages = [], characters = [], chalices = [], relicNames = [], uniqueRelics = [];
 let userRelics = [];
-let demoRelics = [];
+let demoRelics = [], demoActiveRelics = [];
 let searchCondition = {};
 let isSearching = false;
 let isDemoMode = false;
@@ -1222,10 +1227,10 @@ function createRelicDiv(relic, relics) {
 }
 function onClickRelicDelete(b) {
   const id = b.dataset.id;
-  const relics = isDemoMode ? demoRelics : userRelics;
+  const relics = isDemoMode ? demoActiveRelics : userRelics;
   if(confirm("本当にこの所持遺物を削除しますか？")){
     if (isDemoMode) {
-      demoRelics = demoRelics.filter(x=>x.id!==id);
+      demoActiveRelics = demoActiveRelics.filter(x=>x.id!==id);
     } else {
       userRelics = userRelics.filter(x=>x.id!==id);
       saveUserRelicsWithExtended();
@@ -1236,7 +1241,7 @@ function onClickRelicDelete(b) {
 function renderRelics(){
   const list = document.getElementById("inventoryList");
   list.innerHTML = "";
-  const relics = isDemoMode ? demoRelics : userRelics;
+  const relics = isDemoMode ? demoActiveRelics : userRelics;
   if (relics.length === 0) {
     list.textContent = "(登録遺物0件)";
     return;
@@ -1383,7 +1388,7 @@ document.getElementById("searchBtn").addEventListener("click", async ()=>{
 
     // also we might want to include all unique relics as available even if user hasn't acquired them? the UI checkbox 'includeUnique' controls whether unique relics are used as pool.
     // prepare effectMap param for search
-    const relics = isDemoMode ? demoRelics : userRelics;
+    const relics = isDemoMode ? demoActiveRelics : userRelics;
     let relicPool = relics.filter(r =>
       r.effects.some(e => desired.includes(e?.id))
     );
@@ -1599,6 +1604,12 @@ function isOptOutGA(){
 
 // Demo mode
 function toggleDemoMode(_isDemoMode) {
+  if (_isDemoMode && _isDemoMode !== isDemoMode) {
+    demoActiveRelics = JSON.parse(JSON.stringify(demoRelics));
+    d3.shuffle(demoActiveRelics);
+    demoActiveRelics = demoActiveRelics.slice(0, 300);
+  }
+
   isDemoMode = _isDemoMode;
   document.querySelectorAll("#demoSwitchStatus").forEach(e => e.textContent = isDemoMode ? "ON" : "OFF");
   document.querySelectorAll("input.switch-input").forEach(e => {
