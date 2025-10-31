@@ -1697,6 +1697,17 @@ function showConfirmDialog(title, message) {
   });
 }
 
+// バージョン情報取得・表示
+fetch("https://17number.github.io/enr-relics-simulator/version.json")
+  .then(res => res.json())
+  .then(v => {
+    const hash = v.hash;
+    const date = new Date(v.date).toLocaleString();
+    document.getElementById("version").textContent =
+      `Commit: ${hash} (${date})`;
+  })
+  .catch(() => {});
+
 /* initialize */
 loadAll()
   .then(() => {
