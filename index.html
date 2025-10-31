@@ -105,6 +105,16 @@
     user-select: none;
     font-size: 13px;
   }
+  #inventoryHeader {
+    display:flex;
+    gap:8px;
+    align-items:center;
+    margin-bottom:8px;
+    position: sticky;
+    top: 0;
+    padding: 4px 0;
+    background: #fff;
+  }
   .effect-list, .disadvantage-list{padding-left:1.25rem;margin:0;}
   .effect-row, .disadvantage-row{display:flex;gap:8px;align-items:center;margin:6px 0}
   .effect-row .ts-wrapper, .disadvantage-row .ts-wrapper {width: 70vw}
@@ -373,7 +383,7 @@
         <span id="demoSwitchLabel" class="switch-label">デモモード: <strong id="demoSwitchStatus">OFF</strong></span>
       </div>
       <label>所持遺物（ユーザー登録・検索）</label>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <div id="inventoryHeader">
         <input id="inventorySearch" placeholder="ID/効果名/かな/色(r/g/b/y)/大きさ(s/m/l)/遺物種類(n/d)を検索" style="flex:1" />
         <button id="openAddRelic" class="btn-secondary">＋ 所持遺物を登録</button>
       </div>
