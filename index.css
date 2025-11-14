@@ -16,7 +16,7 @@ h1{margin:0 0 12px;font-size:20px}
 select,input,button,textarea{font-size:14px;padding:6px;border:1px solid #ddd;border-radius:6px}
 button{cursor:pointer}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:#eee;margin:4px}
-.color-chip{width:14px;height:14px;border-radius:4px;display:inline-block;margin-right:2px}
+.color-chip{width:14px;height:14px;border-radius:4px;display:inline-block;margin-right:2px;}
 .color-y{background:#f6c34a} .color-g{background:#7cc47b} .color-b{background:#6fa3ff}
 .color-r{background:#f08080} .color-grey{background:#cfcfcf}
 .bg-y { background: #fcf3d5; }
@@ -106,6 +106,9 @@ button{cursor:pointer}
 #inventoryHeader #deleteRelics:hover,
 #inventoryList .relic-item .btn-secondary[data-id] {
   background: #fdd;
+}
+#inventoryList .color-chip {
+  cursor: pointer;
 }
 #addDesiredBtn, #addExcludedBtn, #openAddRelic,
 #importCsvOverwrite, #importCsvAppendStart, #importCsvAppendEnd {

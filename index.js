@@ -767,6 +767,20 @@ function createRelicDiv(relic) {
     </div>
   `;
 
+  // カラーチップクリックで検索エリアに反映
+  div.querySelector(".color-chip").addEventListener("click", () => {
+    const color = relic.color ? relic.color[0].toLowerCase() : "";
+    const searchInput = document.getElementById("inventorySearch");
+    if (searchInput.value.includes(color)) {
+      return;
+    }
+    if (searchInput.value.trim() !== "") {
+      searchInput.value += " ";
+    }
+    searchInput.value += color;
+    searchInput.dispatchEvent(new Event("input"));
+  });
+
   // 効果/デメリット クリックで検索エリアに反映
   div.querySelectorAll(".effect, .disadvantage").forEach(elem => {
     elem.addEventListener("click", () => {
@@ -788,6 +802,7 @@ function createRelicDiv(relic) {
 
   return div;
 }
+
 async function onChangeRelicDeleteCheckbox(event) {
   const id = event.target.dataset.id;
   const checked = event.target.checked;
