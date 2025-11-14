@@ -820,19 +820,69 @@ async function onChangeRelicDeleteCheckbox(event) {
   }
 }
 
+function exportDeletedRelicsCSV(relics) {
+  if (relics.length === 0) {
+    return;
+  }
+
+  const rows = [
+    [
+      "No.",
+      "Name",
+      "Color",
+      "Effect1",
+      "Effect2",
+      "Effect3",
+      "Disadvantage1",
+      "Disadvantage2",
+      "Disadvantage3",
+    ]
+  ];
+  relics.forEach((r, i) => {
+    rows.push([
+      i + 1,  // No.
+      r.name,  // Name
+      COLOR_MAP[r.color],  // Color
+      r.effects.at(0)?.text || "",  // Effect1
+      r.effects.at(1)?.text || "",  // Effect2
+      r.effects.at(2)?.text || "",  // Effect3
+      r.disadvantages.at(0)?.text || "",  // Disadvantage1
+      r.disadvantages.at(1)?.text || "",  // Disadvantage2
+      r.disadvantages.at(2)?.text || "",  // Disadvantage3
+    ]);
+  });
+
+  const csv = Papa.unparse(rows);
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const now = dayjs();
+  a.download = `deleted_relics_${now.format("YYYYMMDD_HHmmss")}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 async function onClickRelicsDeleteButton() {
   if (deleteRelicIds.length === 0) return;
 
-  const isConfirmed = await showConfirmDialog("確認", "チェックした遺物を削除しますか？");
+  const isConfirmed = await showConfirmDialog("確認", `チェックした遺物(${deleteRelicIds.length}件)を削除しますか？`);
   if (!isConfirmed) {
     return;
   }
 
   if (isDemoMode) {
-    demoActiveRelics = demoActiveRelics.filter(x=> !deleteRelicIds.includes(x.id));
+    demoActiveRelics = demoActiveRelics.filter(x => !deleteRelicIds.includes(x.id));
   } else {
-    userRelics = userRelics.filter(x=> !deleteRelicIds.includes(x.id));
+    const deleteRelics = userRelics.filter(x => deleteRelicIds.includes(x.id));
+    userRelics = userRelics.filter(x => !deleteRelicIds.includes(x.id));
     saveUserRelicsWithExtended();
+
+    // 削除した遺物情報をCSV出力
+    exportDeletedRelicsCSV(deleteRelics);
   }
   renderRelics();
 }
