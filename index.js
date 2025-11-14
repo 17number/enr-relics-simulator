@@ -207,6 +207,13 @@ function onCharacterChange() {
     searchCondition.character_id = id;
     renderDesiredRows(true);
     renderExcludedRows(true);
+
+    gtag('event', 'change_character', {
+      event_category: 'ui_action',
+      event_label: 'Character Change',
+      character_id: id,
+      character_name: char?.name,
+    });
   }
   updateSearchCondition();
   saveSearchCondition();
@@ -408,8 +415,14 @@ async function importCSV(file, mode) {
   userRelics = buildUserRelicsForRender(userRelics);
   renderRelics();
 
-  console.table(imported);
-  console.debug(`✅ ${imported.length} 件インポート完了\n\n例:\n${JSON.stringify(imported.slice(0, 3), null, 2)}`);
+  gtag('event', 'import_csv', {
+    event_category: 'ui_action',
+    event_label: 'Import CSV',
+    mode,
+    existing_count: userRelics.length - imported.length,
+    imported_count: imported.length,
+    total_count: userRelics.length,
+  });
 
   clearImportCsvFile();
   closeRelicModal();
@@ -885,6 +898,13 @@ async function onClickRelicsDeleteButton() {
     exportDeletedRelicsCSV(deleteRelics);
   }
   renderRelics();
+
+  gtag('event', 'delete_relics', {
+    event_category: 'ui_action',
+    event_label: 'Delete Relics',
+    isDemoMode,
+    delete_count: deleteRelicIds.length,
+  });
 }
 document.getElementById("deleteRelics").addEventListener("click", onClickRelicsDeleteButton);
 
@@ -995,6 +1015,12 @@ function exportRelicsCSV(){
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+
+  gtag('event', 'export_relics_csv', {
+    event_category: 'ui_action',
+    event_label: 'Export Relics CSV',
+    total_count: userRelics.length,
+  });
 }
 
 /* -----------------------
@@ -1016,6 +1042,15 @@ searchWorker.onmessage = function(e) {
     playCompletionSound();
 
     toggleSearching();
+
+    gtag('event', 'complete_search', {
+      event_category: 'ui_action',
+      event_label: 'Complete Search',
+      isDemoMode,
+      character_id: searchCondition.character_id,
+      character_name: characters.find(c=>c.id===searchCondition.character_id)?.name,
+      elapsed: data.elapsed,
+    });
   } else {
     console.error(data.error);
     playErrorBeep();
@@ -1140,6 +1175,14 @@ document.getElementById("searchBtn").addEventListener("click", async ()=>{
       effectMap: _effectMap,
       desired,
       maxResults: 10,
+    });
+
+    gtag('event', 'start_search', {
+      event_category: 'ui_action',
+      event_label: 'Start Search',
+      isDemoMode,
+      character_id: searchCondition.character_id,
+      character_name: characters.find(c=>c.id===searchCondition.character_id)?.name,
     });
 
     toggleSearching();
@@ -1328,6 +1371,12 @@ function toggleDemoMode(_isDemoMode) {
     }
     deleteRelicIds = [];
     document.getElementById("deleteRelics").setAttribute("disabled", "disabled");
+
+    gtag('event', 'toggle_demo_mode', {
+      event_category: 'ui_action',
+      event_label: 'Toggle Demo Mode',
+      isDemoMode: _isDemoMode,
+    });
   }
 
   isDemoMode = _isDemoMode;
