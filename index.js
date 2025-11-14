@@ -839,6 +839,58 @@ document.querySelectorAll("#importRelicsModal, #r_cancel").forEach(e => e.addEve
 }));
 
 /* -----------------------
+  Output CSV
+------------------------- */
+document.getElementById("exportCsv").addEventListener("click", ()=>{
+  exportRelicsCSV();
+});
+function exportRelicsCSV(){
+  if (userRelics.length === 0) {
+    return;
+  }
+
+  const rows = [
+    [
+      "No.",
+      "Name",
+      "Color",
+      "Effect1",
+      "Effect2",
+      "Effect3",
+      "Disadvantage1",
+      "Disadvantage2",
+      "Disadvantage3",
+    ]
+  ];
+  userRelics.forEach((r, i) => {
+    rows.push([
+      i + 1,  // No.
+      r.name,  // Name
+      COLOR_MAP[r.color],  // Color
+      r.effects.at(0)?.text || "",  // Effect1
+      r.effects.at(1)?.text || "",  // Effect2
+      r.effects.at(2)?.text || "",  // Effect3
+      r.disadvantages.at(0)?.text || "",  // Disadvantage1
+      r.disadvantages.at(1)?.text || "",  // Disadvantage2
+      r.disadvantages.at(2)?.text || "",  // Disadvantage3
+    ]);
+  });
+
+  const csv = Papa.unparse(rows);
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const now = dayjs();
+  a.download = `relics_${now.format("YYYYMMDD_HHmmss")}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* -----------------------
   Search (探索) action
 ------------------------- */
 const searchWorker = new Worker(`searchWorker.js?${Date.now()}`);
