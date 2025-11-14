@@ -16,7 +16,7 @@ h1{margin:0 0 12px;font-size:20px}
 select,input,button,textarea{font-size:14px;padding:6px;border:1px solid #ddd;border-radius:6px}
 button{cursor:pointer}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:#eee;margin:4px}
-.color-chip{width:14px;height:14px;border-radius:4px;display:inline-block;margin-right:2px}
+.color-chip{width:14px;height:14px;border-radius:4px;display:inline-block;margin-right:2px;}
 .color-y{background:#f6c34a} .color-g{background:#7cc47b} .color-b{background:#6fa3ff}
 .color-r{background:#f08080} .color-grey{background:#cfcfcf}
 .bg-y { background: #fcf3d5; }
@@ -64,15 +64,17 @@ button{cursor:pointer}
   user-select: none;
   font-size: 13px;
 }
+#inventoryHeaderWrapper {
+  position: sticky;
+  top: 0;
+  background: #fff;
+}
 #inventoryHeader {
   display:flex;
   gap:8px;
   align-items:center;
   margin-bottom:4px;
-  position: sticky;
-  top: 0;
   padding: 4px 0;
-  background: #fff;
 }
 .effect-list, .disadvantage-list{padding-left:1.25rem;margin:0;}
 .effect-row, .disadvantage-row{display:flex;gap:8px;align-items:center;margin:6px 0}
@@ -106,6 +108,9 @@ button{cursor:pointer}
 #inventoryHeader #deleteRelics:hover,
 #inventoryList .relic-item .btn-secondary[data-id] {
   background: #fdd;
+}
+#inventoryList .color-chip {
+  cursor: pointer;
 }
 #addDesiredBtn, #addExcludedBtn, #openAddRelic,
 #importCsvOverwrite, #importCsvAppendStart, #importCsvAppendEnd {
@@ -141,6 +146,9 @@ button{cursor:pointer}
 }
 .relic-item{display:flex;align-items:center;gap:8px;margin:6px 0;padding:6px;border:1px solid #bbb;border-radius:6px}
 .advantage.desired{color: #f19; font-weight: 600;}
+.effect, .disadvantage {
+  cursor: pointer;
+}
 .disadvantage{margin-left: 4px; color: #2b6cb0}
 .heading{
   font-size: 14px;
@@ -173,7 +181,7 @@ label{display:block;font-size:13px;margin-bottom:6px}
 #inventoryCount {
   font-size: 12px;
   color: #333;
-  margin-bottom:6px;
+  padding-bottom:6px;
 }
 .tab-header {
   display: flex;
