@@ -117,6 +117,16 @@ button{cursor:pointer}
 #importCsvOverwrite:hover, #importCsvAppendStart:hover, #importCsvAppendEnd:hover {
   background: #1d4f91;
 }
+
+.btn-tertiary {
+  background: #4caf7d;
+  color: #fff;
+  border: none;
+}
+.btn-tertiary:hover {
+  background: #3c8c66;
+}
+
 .result-card {
   border: 1px solid #ddd;
   background: #fffefc;
