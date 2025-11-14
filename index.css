@@ -141,6 +141,9 @@ button{cursor:pointer}
 }
 .relic-item{display:flex;align-items:center;gap:8px;margin:6px 0;padding:6px;border:1px solid #bbb;border-radius:6px}
 .advantage.desired{color: #f19; font-weight: 600;}
+.effect, .disadvantage {
+  cursor: pointer;
+}
 .disadvantage{margin-left: 4px; color: #2b6cb0}
 .heading{
   font-size: 14px;

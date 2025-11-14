@@ -737,9 +737,15 @@ function createRelicDiv(relic) {
   }
   const effectList = effectsAndDisadvantages
     .map(e =>
-      `<li>
-        ${e.effect}<span class="disadvantage">${e.disadvantage ? "<br>" + e.disadvantage : ""}</span>
-      </li>
+      `
+        <li>
+          <span class="effect">
+            ${e.effect}
+          </span>
+          <span class="disadvantage">
+            ${e.disadvantage ? "<br>" + e.disadvantage : ""}
+          </span>
+        </li>
       `
     )
     .join("")
@@ -761,6 +767,23 @@ function createRelicDiv(relic) {
     </div>
   `;
 
+  // 効果/デメリット クリックで検索エリアに反映
+  div.querySelectorAll(".effect, .disadvantage").forEach(elem => {
+    elem.addEventListener("click", () => {
+      const text = elem.textContent.trim();
+      const searchInput = document.getElementById("inventorySearch");
+      if (searchInput.value.includes(text)) {
+        return;
+      }
+      if (searchInput.value.trim() !== "") {
+        searchInput.value += " ";
+      }
+      searchInput.value += text;
+      searchInput.dispatchEvent(new Event("input"));
+    });
+  });
+
+  // 削除チェックボックス
   div.querySelector(`input[type="checkbox"]`)?.addEventListener("change", onChangeRelicDeleteCheckbox);
 
   return div;
