@@ -665,6 +665,8 @@ function renderExcludedRows(clear = false) {
 /* -----------------------
   Inventory (user relics) management
 ------------------------- */
+let virtualScroller = null;
+
 function normalizeFullwidth(str) {
   return str.replace(/[A-Za-z0-9!-/:-@[-`{-~]/g, s =>
     String.fromCharCode(s.charCodeAt(0) + 0xFEE0)
@@ -713,7 +715,8 @@ function filterRelics(relics) {
   return filtered;
 }
 
-function createRelicDiv(relic, relics) {
+function createRelicDiv(relic) {
+  const relics = isDemoMode ? demoActiveRelics : userRelics;
   const div = document.createElement("div");
   const colorFirstLetter = relic.color ? relic.color[0] : "grey";
   div.classList.add("relic-item", `bg-${colorFirstLetter}`);
@@ -757,6 +760,9 @@ function createRelicDiv(relic, relics) {
       ${deleteCheckbox}
     </div>
   `;
+
+  div.querySelector(`input[type="checkbox"]`)?.addEventListener("change", onChangeRelicDeleteCheckbox);
+
   return div;
 }
 async function onChangeRelicDeleteCheckbox(event) {
@@ -775,6 +781,7 @@ async function onChangeRelicDeleteCheckbox(event) {
     deleteButtton.setAttribute("disabled", "disabled");
   }
 }
+
 async function onClickRelicsDeleteButton() {
   if (deleteRelicIds.length === 0) return;
 
@@ -792,6 +799,7 @@ async function onClickRelicsDeleteButton() {
   renderRelics();
 }
 document.getElementById("deleteRelics").addEventListener("click", onClickRelicsDeleteButton);
+
 function renderRelics(){
   const list = document.getElementById("inventoryList");
   list.innerHTML = "";
@@ -802,17 +810,20 @@ function renderRelics(){
   }
   // allow search
   const filtered = filterRelics(relics);
-  if (filtered.length===0){
+  if (filtered.length===0) {
     list.textContent = "(該当なし)";
     return;
   }
-  for (const r of filtered){
-    list.appendChild(createRelicDiv(r, relics));
+
+  if (!virtualScroller) {
+    virtualScroller = new VirtualScroller(
+      list,
+      relics,
+      createRelicDiv
+    )
+  } else {
+    virtualScroller.setItems(filtered);
   }
-  // handlers
-  list.querySelectorAll("input[id^='delete-']").forEach(i => {
-    i.addEventListener("change", onChangeRelicDeleteCheckbox);
-  });
 }
 document.getElementById("inventorySearch").addEventListener("input", renderRelics);
 
