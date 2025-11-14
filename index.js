@@ -800,6 +800,13 @@ async function onClickRelicsDeleteButton() {
 }
 document.getElementById("deleteRelics").addEventListener("click", onClickRelicsDeleteButton);
 
+function renderRelicCounts(filteredCount) {
+  const filteredCountElem = document.getElementById("filteredRelicsCount");
+  const totalCountElem = document.getElementById("totalRelicsCount");
+  totalCountElem.textContent = isDemoMode ? demoActiveRelics.length : userRelics.length;
+  filteredCountElem.textContent = filteredCount;
+}
+
 function renderRelics(){
   const list = document.getElementById("inventoryList");
   list.innerHTML = "";
@@ -810,6 +817,7 @@ function renderRelics(){
   }
   // allow search
   const filtered = filterRelics(relics);
+  renderRelicCounts(filtered.length);
   if (filtered.length===0) {
     list.textContent = "(該当なし)";
     return;
