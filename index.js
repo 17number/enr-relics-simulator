@@ -722,7 +722,7 @@ function createRelicDiv(relic) {
   div.classList.add("relic-item", `bg-${colorFirstLetter}`);
   const colorClass = `color-${colorFirstLetter}`;
   const checked = deleteRelicIds.includes(relic.id) ? "checked" : "";
-  const deleteCheckbox = relic.unique ? "" : `<label><input type="checkbox" id="delete-${relic.id}" data-id="${relic.id}" ${checked}>削除</label>`;
+  const deleteCheckbox = relic.unique ? "" : `<label style="cursor: pointer"><input type="checkbox" id="delete-${relic.id}" data-id="${relic.id}" ${checked} style="cursor: pointer">削除</label>`;
   const effectsAndDisadvantages = [];
   for (let i = 0; i < 3; i++) {
     const effect = relic.effects[i];
