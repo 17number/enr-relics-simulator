@@ -139,12 +139,14 @@
         </label>
         <span id="demoSwitchLabel" class="switch-label">デモモード: <strong id="demoSwitchStatus">OFF</strong></span>
       </div>
-      <label>所持遺物（ユーザー登録・検索）</label>
       <div id="inventoryHeader">
         <input id="inventorySearch" placeholder="ID/効果名/かな/色(r/g/b/y)/大きさ(s/m/l)/遺物種類(n/d)を検索" style="flex:1" />
         <button id="openAddRelic" class="btn-secondary">＋遺物登録</button>
         <button id="exportCsv" class="btn-tertiary">CSV出力</button>
         <button id="deleteRelics" class="btn-secondary" disabled>チェック済を削除</button>
+      </div>
+      <div id="inventoryCount">
+        <span id="filteredRelicsCount">0</span> / <span id="totalRelicsCount">0</span>
       </div>
       <div id="inventoryList" class="muted">所持遺物読み込み中...</div>
     </div>
