@@ -30,6 +30,7 @@ let searchCondition = {};
 let deleteRelicIds = [];
 let isSearching = false;
 let isDemoMode = false;
+let currentTab = "usageTab";
 const expandCache = new Map();
 const USER_RELICS_KEY = "my_relics";
 const SEARCH_CONDITION = "search_cond";
@@ -915,6 +916,23 @@ function renderRelicCounts(filteredCount) {
   filteredCountElem.textContent = filteredCount;
 }
 
+function initializeOrRefreshVirtualScroller(relics = [], filtered = []) {
+  if (currentTab !== "inventoryTab") {
+    return;
+  }
+
+  if (!virtualScroller) {
+    const list = document.getElementById("inventoryList");
+    virtualScroller = new VirtualScroller(
+      list,
+      relics,
+      createRelicDiv
+    )
+  } else {
+    virtualScroller.setItems(filtered);
+  }
+}
+
 function renderRelics(){
   const list = document.getElementById("inventoryList");
   list.innerHTML = "";
@@ -931,15 +949,7 @@ function renderRelics(){
     return;
   }
 
-  if (!virtualScroller) {
-    virtualScroller = new VirtualScroller(
-      list,
-      relics,
-      createRelicDiv
-    )
-  } else {
-    virtualScroller.setItems(filtered);
-  }
+  initializeOrRefreshVirtualScroller(relics, filtered);
 }
 document.getElementById("inventorySearch").addEventListener("input", renderRelics);
 
@@ -1320,13 +1330,16 @@ document.addEventListener("DOMContentLoaded", () => {
       tabContents.forEach(c=>c.classList.remove("active"));
       btn.classList.add("active");
       const nextTab = btn.dataset.tab;
+      currentTab = nextTab;
       saveActiveTab(nextTab);
       document.getElementById(nextTab).classList.add("active");
+
+      renderRelics();
     });
   });
 
-  const initialTab = loadActiveTab();
-  document.querySelector(`.tab-header .tab-btn[data-tab="${initialTab}"]`).click();
+  currentTab = loadActiveTab();
+  document.querySelector(`.tab-header .tab-btn[data-tab="${currentTab}"]`).click();
 });
 
 // Google Analytics
