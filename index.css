@@ -64,15 +64,17 @@ button{cursor:pointer}
   user-select: none;
   font-size: 13px;
 }
+#inventoryHeaderWrapper {
+  position: sticky;
+  top: 0;
+  background: #fff;
+}
 #inventoryHeader {
   display:flex;
   gap:8px;
   align-items:center;
   margin-bottom:4px;
-  position: sticky;
-  top: 0;
   padding: 4px 0;
-  background: #fff;
 }
 .effect-list, .disadvantage-list{padding-left:1.25rem;margin:0;}
 .effect-row, .disadvantage-row{display:flex;gap:8px;align-items:center;margin:6px 0}
@@ -179,7 +181,7 @@ label{display:block;font-size:13px;margin-bottom:6px}
 #inventoryCount {
   font-size: 12px;
   color: #333;
-  margin-bottom:6px;
+  padding-bottom:6px;
 }
 .tab-header {
   display: flex;
