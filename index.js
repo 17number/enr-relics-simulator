@@ -731,7 +731,7 @@ function createRelicDiv(relic) {
   for (let i = 0; i < 3; i++) {
     const effect = relic._effects[i];
     const disadvantage = relic._disadvantages[i];
-    if (!effect) {
+    if (!effect?.id) {
       break;
     }
     effectsAndDisadvantages.push({
