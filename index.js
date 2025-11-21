@@ -898,6 +898,7 @@ async function onClickRelicsDeleteButton() {
     // 削除した遺物情報をCSV出力
     exportDeletedRelicsCSV(deleteRelics);
   }
+  deleteRelicIds = [];
   renderRelics();
 
   gtag('event', 'delete_relics', {
