@@ -899,6 +899,8 @@ async function onClickRelicsDeleteButton() {
     exportDeletedRelicsCSV(deleteRelics);
   }
   deleteRelicIds = [];
+  document.getElementById("deleteRelics").setAttribute("disabled", "disabled");
+
   renderRelics();
 
   gtag('event', 'delete_relics', {
