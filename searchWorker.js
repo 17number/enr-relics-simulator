@@ -73,8 +73,8 @@ const relicSearch = (function() {
         if (A === null && B === null) return 0;
         if (A === null) return 1;
         if (B === null) return -1;
-        const aEffs = (A.effects || []).filter(e => desiredIds.includes(e?.id));
-        const bEffs = (B.effects || []).filter(e => desiredIds.includes(e?.id));
+        const aEffs = (A._effects || []).filter(e => desiredIds.includes(e?.id));
+        const bEffs = (B._effects || []).filter(e => desiredIds.includes(e?.id));
         const aAvg = aEffs.length ? average(aEffs.map(e => desiredIds.indexOf(e.id))) : Infinity;
         const bAvg = bEffs.length ? average(bEffs.map(e => desiredIds.indexOf(e.id))) : Infinity;
         return aAvg - bAvg;
@@ -90,8 +90,8 @@ const relicSearch = (function() {
         if (A === null && B === null) return 0;
         if (A === null) return 1;
         if (B === null) return -1;
-        const aCount = (A.effects || []).filter(e => desiredMap.has(e?.id)).length;
-        const bCount = (B.effects || []).filter(e => desiredMap.has(e?.id)).length;
+        const aCount = (A._effects || []).filter(e => desiredMap.has(e?.id)).length;
+        const bCount = (B._effects || []).filter(e => desiredMap.has(e?.id)).length;
         return bCount - aCount;
       });
     }
@@ -219,7 +219,9 @@ const relicSearch = (function() {
               color: r?.color,
               type: r?.type,
               effects: r?.effects || [],
+              _effects: r?._effects || [],
               disadvantages: r?.disadvantages || [],
+              _disadvantages: r?._disadvantages || [],
             })
             ),
             emptySlots
@@ -237,7 +239,7 @@ const relicSearch = (function() {
             if (usedIds.has(cand.id)) continue;
             usedIds.add(cand.id);
             combo[idx] = cand;
-            selectedEffectsBySlot[idx] = (cand.effects || []).filter(e => e).map(e => ({ id: e.id, level: e.level }));
+            selectedEffectsBySlot[idx] = (cand._effects || []).filter(e => e).map(e => ({ id: e.id, level: e.level }));
           }
 
           // ---- 枝刈り部分 ----

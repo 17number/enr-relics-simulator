@@ -109,10 +109,14 @@ async function loadAll(){
 
 function buildUserRelicsForRender(relics) {
   return relics.map(r => {
+    if (r._effects && r._disadvantages) {
+      return r;
+    }
+
     const relicObj = allRelics.find(_r => _r.id === r.relic_id);
     const _effects = r.effects.map(eid => {
       const effectObj = allEffects.find(_e => _e.id === eid);
-      if (!effectObj) return null;
+      if (!effectObj) return {id: eid};
       return {
         id: eid,
         text: effectObj.text,
@@ -121,7 +125,7 @@ function buildUserRelicsForRender(relics) {
     });
     const _disadvantages = r.disadvantages.map(did => {
       const disadvandageObj = disadvantages.find(_d => _d.id === did);
-      if (!disadvandageObj) return null;
+      if (!disadvandageObj) return {id: did};
       return {
         id: did,
         text: disadvandageObj.text,
@@ -135,8 +139,10 @@ function buildUserRelicsForRender(relics) {
       color: r.color ?? COLOR_MAP[relicObj.color],
       type: relicObj.type,
       unique: relicObj.unique,
-      effects: _effects,
-      disadvantages: _disadvantages,
+      effects: r.effects,
+      _effects,
+      disadvantages: r.disadvantages,
+      _disadvantages,
     };
   });
 }
@@ -299,22 +305,6 @@ function saveUserRelics(){
   );
 }
 
-function saveUserRelicsWithExtended(){
-  localStorage.setItem(
-    USER_RELICS_KEY,
-    JSON.stringify(
-      (userRelics||[])
-        .map(r => ({
-          id: r.id,
-          color: r.color,
-          relic_id: r.relic_id,
-          effects: r.effects.map(e => e?.id ?? 0),
-          disadvantages: r.disadvantages.map(d => d?.id ?? 0),
-        }))
-    ),
-  );
-}
-
 /**
  * テキストの近いものを取得
  */
@@ -396,7 +386,7 @@ async function importCSV(file, mode) {
       relic_id: r.relic_id,
       color: r.color[0],
       effects: r.effects.map(e => e?.id ?? 0),
-      disadvantages: r.disadvantages.map(d => d?.id ?? 0),
+      disadvantages: r._disadvantages.map(d => d?.id ?? 0),
     }));
     if (mode === "append-start") {
       userRelics = [
@@ -700,14 +690,14 @@ function filterRelics(relics) {
       if((r.name||"").toLowerCase().includes(_q)) return true;
       // 効果
       const _Q = normalizeFullwidth(_q);
-      if((r.effects||[]).some(e=>{
+      if((r._effects||[]).some(e=>{
         return (
           (e?.text||"").toLowerCase().includes(_Q) ||
           (e?.kana||"").toLowerCase().includes(_Q)
         );
       })) return true;
       // デメリット
-      if((r.disadvantages||[]).some(d=>{
+      if((r._disadvantages||[]).some(d=>{
         return (
           (d?.text||"").toLowerCase().includes(_Q) ||
           (d?.kana||"").toLowerCase().includes(_Q)
@@ -717,7 +707,7 @@ function filterRelics(relics) {
       const color = (r.color.at(0) ?? "").toLowerCase();
       if(["r","g","b","y"].includes(_q) && color == _q) return true;
       // 大きさ
-      const size = r.effects.filter(e => e?.id).length;
+      const size = r._effects.filter(e => e?.id).length;
       if(["s","m","l"].includes(_q) && SIZE_MAP[_q] === size) return true;
       // 遺物種類
       const type = r.type.at(0) ?? "";
@@ -739,8 +729,8 @@ function createRelicDiv(relic) {
   const deleteCheckbox = relic.unique ? "" : `<label style="cursor: pointer"><input type="checkbox" id="delete-${relic.id}" data-id="${relic.id}" ${checked} style="cursor: pointer">削除</label>`;
   const effectsAndDisadvantages = [];
   for (let i = 0; i < 3; i++) {
-    const effect = relic.effects[i];
-    const disadvantage = relic.disadvantages[i];
+    const effect = relic._effects[i];
+    const disadvantage = relic._disadvantages[i];
     if (!effect) {
       break;
     }
@@ -857,12 +847,12 @@ function exportDeletedRelicsCSV(relics) {
       i + 1,  // No.
       r.name,  // Name
       COLOR_MAP[r.color],  // Color
-      r.effects.at(0)?.text || "",  // Effect1
-      r.effects.at(1)?.text || "",  // Effect2
-      r.effects.at(2)?.text || "",  // Effect3
-      r.disadvantages.at(0)?.text || "",  // Disadvantage1
-      r.disadvantages.at(1)?.text || "",  // Disadvantage2
-      r.disadvantages.at(2)?.text || "",  // Disadvantage3
+      r._effects.at(0)?.text || "",  // Effect1
+      r._effects.at(1)?.text || "",  // Effect2
+      r._effects.at(2)?.text || "",  // Effect3
+      r._disadvantages.at(0)?.text || "",  // Disadvantage1
+      r._disadvantages.at(1)?.text || "",  // Disadvantage2
+      r._disadvantages.at(2)?.text || "",  // Disadvantage3
     ]);
   });
 
@@ -893,7 +883,7 @@ async function onClickRelicsDeleteButton() {
   } else {
     const deleteRelics = userRelics.filter(x => deleteRelicIds.includes(x.id));
     userRelics = userRelics.filter(x => !deleteRelicIds.includes(x.id));
-    saveUserRelicsWithExtended();
+    saveUserRelics();
 
     // 削除した遺物情報をCSV出力
     exportDeletedRelicsCSV(deleteRelics);
@@ -1007,12 +997,12 @@ function exportRelicsCSV(){
       i + 1,  // No.
       r.name,  // Name
       COLOR_MAP[r.color],  // Color
-      r.effects.at(0)?.text || "",  // Effect1
-      r.effects.at(1)?.text || "",  // Effect2
-      r.effects.at(2)?.text || "",  // Effect3
-      r.disadvantages.at(0)?.text || "",  // Disadvantage1
-      r.disadvantages.at(1)?.text || "",  // Disadvantage2
-      r.disadvantages.at(2)?.text || "",  // Disadvantage3
+      r._effects.at(0)?.text || "",  // Effect1
+      r._effects.at(1)?.text || "",  // Effect2
+      r._effects.at(2)?.text || "",  // Effect3
+      r._disadvantages.at(0)?.text || "",  // Disadvantage1
+      r._disadvantages.at(1)?.text || "",  // Disadvantage2
+      r._disadvantages.at(2)?.text || "",  // Disadvantage3
     ]);
   });
 
@@ -1139,7 +1129,7 @@ document.getElementById("searchBtn").addEventListener("click", async ()=>{
       if(!selectDisadvantage) continue;
       const disId = Number(selectDisadvantage.value.trim() || 0);
       if(!disId) continue;
-      const disadvantage = disadvantages.find(e=> e.id === disId);
+      const disadvantage = disadvantages.find(d=> d.id === disId);
       if(!disadvantage) {
         return;
       }
@@ -1151,12 +1141,12 @@ document.getElementById("searchBtn").addEventListener("click", async ()=>{
     // prepare effectMap param for search
     const relics = isDemoMode ? demoActiveRelics : userRelics;
     let relicPool = relics.filter(r =>
-      r.effects.some(e => desired.includes(e?.id))
+      r._effects.some(e => desired.includes(e?.id))
     );
     if (excluded.length) {
       // デメリット効果で絞り込み
       relicPool = relicPool.filter(r =>
-        r.disadvantages.map(d => d?.id).every(did => !excluded.includes(did))
+        r._disadvantages.map(d => d?.id).every(did => !excluded.includes(did))
       );
     }
 
@@ -1259,16 +1249,16 @@ function renderResults(results, desired) {
         colorClass = `color-${slot.color[0]}`;
         let effectList = ``;
         for(let i=0;i<3;i++){
-          const effect = (slot.effects || []).at(i);
-          if (!effect) break;
+          const effect = (slot._effects || []).at(i);
+          if (!effect?.id) break;
 
           const advantageClass = desired.includes(effect.id) ? `advantage desired` : `advantage`;
-          const disadvantage = (slot.disadvantages || []).at(i);
+          const disadvantage = (slot._disadvantages || []).at(i);
           let spanDisadvantage = ``;
           if (disadvantage) {
               spanDisadvantage = `
                 <span class="disadvantage" data-disadvantage-id="${disadvantage.id}">
-                  ${disadvantage ? "<br>" + disadvantage.text : ""}
+                  ${disadvantage?.text ? "<br>" + disadvantage.text : ""}
                 </span>
               `
           }
