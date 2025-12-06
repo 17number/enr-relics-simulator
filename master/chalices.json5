@@ -18,6 +18,12 @@
     "colors": ["b", "b", "b", "b", "b", "b"],
   },
   {
+    "id": 131,
+    "character": "*",
+    "name": "影樹の聖杯",
+    "colors": ["r", "r", "r", "r", "r", "r"],
+  },
+  {
     "id": 4,
     "character": "追跡者",
     "name": "追跡者の器",
